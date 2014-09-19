@@ -38,7 +38,13 @@ class ComputerPlayer
     #Return If We've Found A Checkmate
     valid_steps = self.valid_steps(board, color)
 
-    return self.evaluate(board) if valid_steps.empty?
+    # return self.evaluate(board) if valid_steps.empty?
+    if valid_steps.empty?
+      puts "no valid steps"
+      puts self.evaluate(board)
+    end
+
+    return [[[nil]]] if valid_steps.empty?
 
     crystal_ball = valid_steps.map{|step| [step]}
 
@@ -55,13 +61,12 @@ class ComputerPlayer
     crystal_ball
   end
 
-  def process_tree(future_tree, level)
+  def process_tree(future_tree, level = 0)
 
     if level == self.recurse_level
       last_our_moves = future_tree.each do |our_turn|
-        next unless our_turn[-1].is_a?(Array)
         #The Last Possible Enemy Moves
-
+        p future_tree
         our_turn[-1] = self.min_of_last_nodes(our_turn[-1])
       end
       our_max = max_of_last_nodes(last_our_moves)
@@ -71,22 +76,17 @@ class ComputerPlayer
     else
       # This updates the nodes one level deep
       future_tree.each do |our_turn|
-          next unless our_turn[-1].is_a?(Array)
         our_turn.each do |their_turn|
-          next unless their_turn[-1].is_a?(Array)
-          p their_turn if their_turn[-1] == [1,0]
           their_turn[-1] = self.process_tree(their_turn[-1], level + 1)
         end
       end
 
       # Returns The max value to be merged in
       future_tree_tree.each do |our_turn|
-        next unless our_turn[-1].is_a?(Array)
         our_turn[-1] = self.min_of_last_nodes(our_turn[-1])
       end
 
       # Return last of our turns
-      p  max_of_last_nodes(last_our_moves)
       max_of_last_nodes(last_our_moves)
     end
 
@@ -166,7 +166,7 @@ if __FILE__ == $PROGRAM_NAME
   end_time = Time.new
   print "took #{end_time - start_time} seconds to generate future tree\n"
   # p future_sight.first.last
-  player.process_tree(future_sight,0)
+  player.process_tree(future_sight)
   # p future_sight.last[2]
   # Took 4.27 seconds with plain look ahead
 
